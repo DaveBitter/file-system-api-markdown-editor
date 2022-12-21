@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv='Content-Type' content='text/html; charset=utf-8' />
+    <meta httpEquiv='content-language' content='en' />
+    <meta name='viewport' id='viewporttag' content='width=device-width, user-scalable=no, initial-scale=1' />
+
+    <link rel='apple-touch-icon' sizes='57x57' href='./favicons/apple-icon-57x57.png' />
+    <link rel='apple-touch-icon' sizes='60x60' href='./favicons/apple-icon-60x60.png' />
+    <link rel='apple-touch-icon' sizes='72x72' href='./favicons/apple-icon-72x72.png' />
+    <link rel='apple-touch-icon' sizes='76x76' href='./favicons/apple-icon-76x76.png' />
+    <link rel='apple-touch-icon' sizes='114x114' href='./favicons/apple-icon-114x114.png' />
+    <link rel='apple-touch-icon' sizes='120x120' href='./favicons/apple-icon-120x120.png' />
+    <link rel='apple-touch-icon' sizes='144x144' href='./favicons/apple-icon-144x144.png' />
+    <link rel='apple-touch-icon' sizes='152x152' href='./favicons/apple-icon-152x152.png' />
+    <link rel='apple-touch-icon' sizes='180x180' href='./favicons/apple-icon-180x180.png' />
+    <link rel='icon' type='image/png' sizes='192x192' href='./favicons/android-icon-192x192.png' />
+    <link rel='icon' type='image/png' sizes='32x32' href='./favicons/favicon-32x32.png' />
+    <link rel='icon' type='image/png' sizes='96x96' href='./favicons/favicon-96x96.png' />
+    <link rel='icon' type='image/png' sizes='16x16' href='./favicons/favicon-16x16.png' />
+
+    <meta name='msapplication-TileColor' content='#222222' />
+    <meta name='msapplication-TileImage' content='./favicons/ms-icon-144x144.png' />
+
+    <meta name='theme-color' content='#222222'></meta>
+
+    <title>File System API MarkDown Editor</title>
+    <meta name='description' content="A MarkDown Editor using the native Web File System API" />
+    <link rel="stylesheet" href="./style.css" />
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar" data-is-open="false" data-sidebar>
+        <div class="sidebar__controls">
+          <button class="sidebar__control" data-sidebar-toggle><img src="./icons/files.svg" /></button>
+        </div>
+        <div class="sidebar__content">
+          <button class="folder-picker" autofocus data-open-folder>Open folder</button>
+          <div class="file-list" data-file-root-list></div>
+          <!-- <ul class="file-list">
+            <li class="file-list__item">file.md</li>
+            <li class="file-list__item">
+              Folder
+              <ul class="file-list">
+                <li class="file-list__item">nested-file.md</li>
+                <li class="file-list__item">nested-file.md</li>
+                <li class="file-list__item">nested-file.md</li>
+                <li class="file-list__item">nested-file.md</li>
+                <li class="file-list__item">nested-file.md</li>
+              </ul>
+            </li>
+            <li class="file-list__item">file.md</li>
+            <li class="file-list__item">file.md</li>
+            <li class="file-list__item">file.md</li>
+            <li class="file-list__item">file.md</li>
+            <li class="file-list__item">file.md</li>
+            <li class="file-list__item">file.md</li>
+            <li class="file-list__item">file.md</li>
+          </ul> -->
+
+          <template data-template-file-list>
+            <ul class="file-list"></ul>
+          </template>
+          <template data-template-file-list-item>
+            <li class="file-list__item"><button class="file-list__item-button" data-file-list-item-button></button></li>
+          </template>
+          <template data-template-file-list-directory>
+            <li class="file-list__item"><span class="file-list__item-directory" data-file-list-item-directory></span></li>
+          </template>
+        </div>
+      </aside>
+      <main class="main">
+        <ul class="toolbar">
+          <li class="toolbar__item">
+            <button class="toolbar__item-button" disabled data-save-button>Save</button>
+          </li>
+        </ul>
+        <div class="editor" data-editor data-is-active="false"></div>
+      </main>
+    </div>
+  </body>
+</html>
