@@ -23,6 +23,9 @@ let currentWorkingFile;
 let hasChanges = false;
 
 const handleChange = async () => {
+  if (!currentWorkingFile) {
+    return;
+  }
   const updatedContent = editor.getMarkdown();
   const file = await currentWorkingFile.getFile();
   const contents = await file.text();
@@ -77,31 +80,67 @@ const saveCurrentWorkingFile = async () => {
 
 elements.saveButton.addEventListener("click", saveCurrentWorkingFile);
 
+const getEntriesRecursivelyFromSelectedDirectory = async (asd) => {
+  const entries = [];
+  for await (const entry of asd.values()) {
+    const { kind } = entry;
+
+    switch (kind) {
+      case "file":
+        entries.push({
+          kind,
+          entry,
+        });
+        break;
+
+      case "directory":
+        const handles = await asd.getDirectoryHandle(entry.name);
+
+        entries.push({
+          kind,
+          entry,
+          entries: await getEntriesRecursivelyFromSelectedDirectory(
+            handles
+          ).catch(console.error),
+        });
+        break;
+    }
+  }
+
+  return entries.sort((a, b) => a.kind.localeCompare(b.kind));
+};
+
+const openFile = async (entry) => {
+  hasChanges = false;
+  elements.saveButton.disabled = true;
+  currentWorkingFile = entry;
+  const file = await entry.getFile();
+  const contents = await file.text();
+
+  editor.setMarkdown(contents);
+};
+
 elements.openFolderButton.addEventListener("click", async () => {
-  const dirHandle = await window.showDirectoryPicker();
+  const dirHandle = await window.showDirectoryPicker({
+    types: [
+      {
+        description: "Markdown",
+        accept: {
+          "text/markdown": [".md"],
+        },
+      },
+    ],
+  });
 
   elements.editor.dataset.isActive = "true";
   elements.fileRootList.innerHTML = null;
+  editor.setMarkdown();
 
-  const entries = [];
-  for await (const entry of dirHandle.values()) {
-    entries.push(entry);
-  }
+  const entries = await getEntriesRecursivelyFromSelectedDirectory(dirHandle);
 
-  const openFile = async (entry) => {
-    hasChanges = false;
-    elements.saveButton.disabled = true;
-    currentWorkingFile = entry;
-    const file = await entry.getFile();
-    const contents = await file.text();
-
-    editor.setMarkdown(contents);
-  };
-
-  entries
-    .sort((a, b) => b.name - a.name)
-    .forEach((entry) => {
-      const { name, kind } = entry;
+  const renderEntries = async (entries, root) => {
+    for (const item of entries) {
+      const { kind, entry, entries } = item;
 
       switch (kind) {
         case "file":
@@ -125,22 +164,34 @@ elements.openFolderButton.addEventListener("click", async () => {
             }
           });
 
-          fileListItemButton.innerText = name;
-          elements.fileRootList.appendChild(fileListItemClone);
+          fileListItemButton.innerText = entry.name;
+          root.appendChild(fileListItemClone);
           break;
 
         case "directory":
           const fileListDirectoryClone =
             templates.fileListDirectory.content.cloneNode(true);
+          const fileListClone = templates.fileList.content.cloneNode(true);
 
+          const fileListItem = fileListDirectoryClone.querySelector(
+            "[data-file-list-item]"
+          );
           const fileListDirectory = fileListDirectoryClone.querySelector(
             "[data-file-list-item-directory]"
           );
+          const fileList = fileListClone.querySelector("[data-file-list]");
 
-          fileListDirectory.innerText = name;
-          elements.fileRootList.appendChild(fileListDirectoryClone);
+          fileListDirectory.innerText = entry.name;
+          root.appendChild(fileListDirectoryClone);
+          fileListItem.appendChild(fileListClone);
+
+          await renderEntries(entries, fileList);
+          break;
         default:
           break;
       }
-    });
+    }
+  };
+
+  renderEntries(entries, elements.fileRootList);
 });

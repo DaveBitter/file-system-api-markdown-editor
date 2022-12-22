@@ -38,36 +38,16 @@
         </div>
         <div class="sidebar__content">
           <button class="folder-picker" autofocus data-open-folder>Open folder</button>
-          <div class="file-list" data-file-root-list></div>
-          <!-- <ul class="file-list">
-            <li class="file-list__item">file.md</li>
-            <li class="file-list__item">
-              Folder
-              <ul class="file-list">
-                <li class="file-list__item">nested-file.md</li>
-                <li class="file-list__item">nested-file.md</li>
-                <li class="file-list__item">nested-file.md</li>
-                <li class="file-list__item">nested-file.md</li>
-                <li class="file-list__item">nested-file.md</li>
-              </ul>
-            </li>
-            <li class="file-list__item">file.md</li>
-            <li class="file-list__item">file.md</li>
-            <li class="file-list__item">file.md</li>
-            <li class="file-list__item">file.md</li>
-            <li class="file-list__item">file.md</li>
-            <li class="file-list__item">file.md</li>
-            <li class="file-list__item">file.md</li>
-          </ul> -->
+          <ul class="file-list" data-file-root-list></ul>
 
           <template data-template-file-list>
-            <ul class="file-list"></ul>
+            <ul class="file-list" data-file-list></ul>
           </template>
           <template data-template-file-list-item>
-            <li class="file-list__item"><button class="file-list__item-button" data-file-list-item-button></button></li>
+            <li class="file-list__item" data-file-list-item><button class="file-list__item-button" data-file-list-item-button></button></li>
           </template>
           <template data-template-file-list-directory>
-            <li class="file-list__item"><span class="file-list__item-directory" data-file-list-item-directory></span></li>
+            <li class="file-list__item" data-file-list-item><span class="file-list__item-directory" data-file-list-item-directory></span></li>
           </template>
         </div>
       </aside>

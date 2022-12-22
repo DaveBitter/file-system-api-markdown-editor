@@ -79,11 +79,14 @@ body {
 
 .toolbar__item-button,
 .folder-picker {
-  padding: 1rem;
   border: none;
   font-weight: 700;
   cursor: pointer;
   background-color: var(--color-primary);
+}
+
+.folder-picker {
+  padding: 0.5rem;
 }
 
 .file-list {
@@ -102,10 +105,7 @@ body {
 
 .file-list__item {
   display: flex;
-}
-
-.file-list__item:last-of-type .file-list__item-button {
-  padding-bottom: 0;
+  flex-direction: column;
 }
 
 .file-list__item:has(.file-list) {
@@ -120,10 +120,10 @@ body {
 .file-list__item-directory {
   flex: 1;
   font-family: monospace;
-  padding: 0.5rem 0;
 }
 
 .file-list__item-button {
+  padding: 0.25rem 0;
   border: none;
   text-align: left;
   background: none;
@@ -145,6 +145,10 @@ body {
   padding: 0;
   gap: 1rem;
   padding: 0 1rem;
+}
+
+.toolbar__item-button {
+  padding: 0.5rem;
 }
 
 .toolbar__item-button:disabled {

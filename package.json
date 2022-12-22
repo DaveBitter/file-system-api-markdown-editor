@@ -1,7 +1,6 @@
 {
   "name": "file-system-api-markdown-editor",
   "version": "1.0.0",
-  "main": "index.js",
   "repository": "https://github.com/DaveBitter/file-system-api-markdown-editor.git",
   "author": "Dave Bitter <dbitter@anwb.nl>",
   "license": "MIT",
