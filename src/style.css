@@ -3,9 +3,12 @@
   --color-bg: #ffffff;
   --color-bg-darker: #eeeeee;
   --color-bg-darkest: #cccccc;
+
   --box-shadow-standard: rgba(60, 64, 67, 0.15) 0px 1px 7px 7px;
+
   --sidebar-size-closed: 3rem;
   --sidebar-content-width: 20rem;
+
   --transition-duration-snappy: 200ms;
 }
 

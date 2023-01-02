@@ -1,7 +1,9 @@
+/*** External deps ***/
 import Editor from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import "@toast-ui/editor/dist/theme/toastui-editor-dark.css";
 
+/*** Cached selectors to be used ***/
 const elements = {
   sidebar: document.querySelector("[data-sidebar]"),
   sidebarToggle: document.querySelector("[data-sidebar-toggle]"),
@@ -19,70 +21,210 @@ const templates = {
   ),
 };
 
-let currentWorkingFile;
-let hasChanges = false;
-
-const handleChange = async () => {
-  if (!currentWorkingFile) {
-    return;
-  }
-  const updatedContent = editor.getMarkdown();
-  const file = await currentWorkingFile.getFile();
-  const contents = await file.text();
-
-  hasChanges = updatedContent !== contents;
-  elements.saveButton.disabled = updatedContent === contents;
+/*** Contstants ***/
+const CONSTANTS = {
+  MATCH_MEDIA_QUERY: window.matchMedia("(min-width: 50rem)"),
 };
 
-const editor = new Editor({
-  el: document.querySelector("[data-editor]"),
-  initialEditType: "markdown",
-  previewStyle: window.innerWidth < 800 ? "horizontal" : "vertical",
-  height: "100vh",
-  events: {
-    change: handleChange,
-  },
-});
+let editor;
 
-editor.setPlaceholder("Open a file to edit");
+/*** Application state ***/
+const state = {
+  currentWorkingHandle: null,
+  hasChanges: false,
+};
 
-const mediaQuery = window.matchMedia("(min-width: 50rem)");
+/*** Helpers ***/
+const handleFileSelection = (entry) => {
+  if (state.hasChanges) {
+    if (
+      window.confirm(
+        "You have unsafed work. Are you sure you want to discard this?"
+      )
+    ) {
+      openFile(entry);
+    }
+  } else {
+    openFile(entry);
+  }
+};
 
-elements.sidebar.dataset.isOpen = mediaQuery.matches ? "true" : "false";
-editor.changePreviewStyle(mediaQuery.matches ? "vertical" : "tab");
+const renderSidebarItemForDirectoryEntry = async (root, item) => {
+  const { entry, entries } = item;
 
-mediaQuery.addEventListener("change", ({ matches }) => {
+  const fileListDirectoryClone =
+    templates.fileListDirectory.content.cloneNode(true);
+  const fileListClone = templates.fileList.content.cloneNode(true);
+
+  const fileListItem = fileListDirectoryClone.querySelector(
+    "[data-file-list-item]"
+  );
+  const fileListDirectory = fileListDirectoryClone.querySelector(
+    "[data-file-list-item-directory]"
+  );
+  const fileList = fileListClone.querySelector("[data-file-list]");
+
+  fileListDirectory.innerText = entry.name;
+  root.appendChild(fileListDirectoryClone);
+  fileListItem.appendChild(fileListClone);
+
+  await renderSidebarItemsFromEntries(entries, fileList);
+};
+
+const renderSidebarItemForFileEntry = (root, item) => {
+  const { entry } = item;
+
+  const fileListItemClone = templates.fileListItem.content.cloneNode(true);
+  const fileListItemButton = fileListItemClone.querySelector(
+    "[data-file-list-item-button]"
+  );
+
+  fileListItemButton.addEventListener("click", () =>
+    handleFileSelection(entry)
+  );
+
+  fileListItemButton.innerText = entry.name;
+  root.appendChild(fileListItemClone);
+};
+
+const renderSidebarItemsFromEntries = async (entries, root) => {
+  for (const item of entries) {
+    switch (item.kind) {
+      case "file":
+        renderSidebarItemForFileEntry(root, item);
+        break;
+
+      case "directory":
+        await renderSidebarItemForDirectoryEntry(root, item);
+        break;
+      default:
+        break;
+    }
+  }
+};
+
+const openFolder = async () => {
+  const dirHandle = await window.showDirectoryPicker({
+    types: [
+      {
+        description: "Markdown",
+        accept: {
+          "text/markdown": [".md"],
+        },
+      },
+    ],
+  });
+
+  const entries = await getEntriesRecursivelyFromSelectedDirectory(dirHandle);
+
+  elements.fileRootList.innerHTML = null;
+  renderSidebarItemsFromEntries(entries, elements.fileRootList);
+};
+
+const onMediaQueryChange = ({ matches }) => {
   elements.sidebar.dataset.isOpen = matches ? "true" : "false";
   editor.changePreviewStyle(matches ? "vertical" : "tab");
-});
+};
 
-elements.sidebarToggle.addEventListener("click", () => {
+const toggleSidebar = () => {
   elements.sidebar.dataset.isOpen = !(
     elements.sidebar.dataset.isOpen === "true"
   );
-});
+};
 
-const saveCurrentWorkingFile = async () => {
+const initializeEventListeners = () => {
+  elements.sidebarToggle.addEventListener("click", toggleSidebar);
+  elements.saveButton.addEventListener("click", saveCurrentWorkingHandle);
+  elements.openFolderButton.addEventListener("click", openFolder);
+};
+
+const initializeEditor = () => {
+  editor = new Editor({
+    el: document.querySelector("[data-editor]"),
+    initialEditType: "markdown",
+    previewStyle: window.innerWidth < 800 ? "horizontal" : "vertical",
+    height: "100vh",
+    events: {
+      change: handleChange,
+    },
+  });
+
+  editor.setPlaceholder("Open a file to edit");
+
+  elements.editor.dataset.isActive = "true";
+  editor.setMarkdown();
+  editor.changePreviewStyle(
+    CONSTANTS.MATCH_MEDIA_QUERY.matches ? "vertical" : "tab"
+  );
+};
+
+const initializeSidebar = () => {
+  elements.sidebar.dataset.isOpen = CONSTANTS.MATCH_MEDIA_QUERY.matches
+    ? "true"
+    : "false";
+
+  CONSTANTS.MATCH_MEDIA_QUERY.addEventListener("change", onMediaQueryChange);
+
+  elements.fileRootList.innerHTML = null;
+};
+
+const initializeApplication = () => {
+  initializeSidebar();
+  initializeEditor();
+  initializeEventListeners();
+};
+
+const setIsChangedState = (isChanged) => {
+  state.hasChanges = isChanged;
+  elements.saveButton.disabled = !isChanged;
+};
+
+const saveFileForHandle = async (handle) => {
   const updatedContent = editor.getMarkdown();
-  const file = await currentWorkingFile.getFile();
+
+  const writable = await handle.createWritable();
+  await writable.write(updatedContent);
+  await writable.close();
+
+  setIsChangedState(false);
+};
+
+const getFileContentsForHandle = async (handle) => {
+  const file = await handle.getFile();
   const contents = await file.text();
 
+  return contents;
+};
+
+const handleChange = async () => {
+  /* ToastUI triggers the change event when the editor is cleared which can be ignored */
+  if (!state.currentWorkingHandle) {
+    return;
+  }
+
+  const updatedContent = editor.getMarkdown();
+  const contents = await getFileContentsForHandle(state.currentWorkingHandle);
+
+  setIsChangedState(updatedContent !== contents);
+};
+
+const saveCurrentWorkingHandle = async () => {
+  const updatedContent = editor.getMarkdown();
+
+  const contents = await getFileContentsForHandle(state.currentWorkingHandle);
+
+  /* No need to save (and get permission) if there are no changes */
   if (updatedContent === contents) {
     return;
   }
 
-  const writable = await currentWorkingFile.createWritable();
-  await writable.write(updatedContent);
-  await writable.close();
-  hasChanges = false;
-  elements.saveButton.disabled = true;
+  saveFileForHandle(state.currentWorkingHandle);
 };
 
-elements.saveButton.addEventListener("click", saveCurrentWorkingFile);
-
-const getEntriesRecursivelyFromSelectedDirectory = async (asd) => {
+const getEntriesRecursivelyFromSelectedDirectory = async (directoryHandle) => {
   const entries = [];
-  for await (const entry of asd.values()) {
+
+  for await (const entry of directoryHandle.values()) {
     const { kind } = entry;
 
     switch (kind) {
@@ -94,7 +236,7 @@ const getEntriesRecursivelyFromSelectedDirectory = async (asd) => {
         break;
 
       case "directory":
-        const handles = await asd.getDirectoryHandle(entry.name);
+        const handles = await directoryHandle.getDirectoryHandle(entry.name);
 
         entries.push({
           kind,
@@ -111,87 +253,11 @@ const getEntriesRecursivelyFromSelectedDirectory = async (asd) => {
 };
 
 const openFile = async (entry) => {
-  hasChanges = false;
-  elements.saveButton.disabled = true;
-  currentWorkingFile = entry;
-  const file = await entry.getFile();
-  const contents = await file.text();
+  setIsChangedState(false);
+  state.currentWorkingHandle = entry;
 
+  const contents = await await getFileContentsForHandle(entry);
   editor.setMarkdown(contents);
 };
 
-elements.openFolderButton.addEventListener("click", async () => {
-  const dirHandle = await window.showDirectoryPicker({
-    types: [
-      {
-        description: "Markdown",
-        accept: {
-          "text/markdown": [".md"],
-        },
-      },
-    ],
-  });
-
-  elements.editor.dataset.isActive = "true";
-  elements.fileRootList.innerHTML = null;
-  editor.setMarkdown();
-
-  const entries = await getEntriesRecursivelyFromSelectedDirectory(dirHandle);
-
-  const renderEntries = async (entries, root) => {
-    for (const item of entries) {
-      const { kind, entry, entries } = item;
-
-      switch (kind) {
-        case "file":
-          const fileListItemClone =
-            templates.fileListItem.content.cloneNode(true);
-          const fileListItemButton = fileListItemClone.querySelector(
-            "[data-file-list-item-button]"
-          );
-
-          fileListItemButton.addEventListener("click", () => {
-            if (hasChanges) {
-              if (
-                window.confirm(
-                  "You have unsafed work. Are you sure you want to discard this?"
-                )
-              ) {
-                openFile(entry);
-              }
-            } else {
-              openFile(entry);
-            }
-          });
-
-          fileListItemButton.innerText = entry.name;
-          root.appendChild(fileListItemClone);
-          break;
-
-        case "directory":
-          const fileListDirectoryClone =
-            templates.fileListDirectory.content.cloneNode(true);
-          const fileListClone = templates.fileList.content.cloneNode(true);
-
-          const fileListItem = fileListDirectoryClone.querySelector(
-            "[data-file-list-item]"
-          );
-          const fileListDirectory = fileListDirectoryClone.querySelector(
-            "[data-file-list-item-directory]"
-          );
-          const fileList = fileListClone.querySelector("[data-file-list]");
-
-          fileListDirectory.innerText = entry.name;
-          root.appendChild(fileListDirectoryClone);
-          fileListItem.appendChild(fileListClone);
-
-          await renderEntries(entries, fileList);
-          break;
-        default:
-          break;
-      }
-    }
-  };
-
-  renderEntries(entries, elements.fileRootList);
-});
+initializeApplication();
