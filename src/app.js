@@ -33,22 +33,23 @@ let editor;
 
 /*** Application state ***/
 const state = {
-  currentWorkingHandle: null,
+  activeWorkingHandle: null,
+  activeWorkingSidebarNode: null,
   hasChanges: false,
 };
 
 /*** Helpers ***/
-const handleFileSelection = (entry) => {
+const handleFileSelection = (entry, sidebarNode) => {
   if (state.hasChanges) {
     if (
       window.confirm(
         "You have unsafed work. Are you sure you want to discard this?"
       )
     ) {
-      openFile(entry);
+      openFile(entry, sidebarNode);
     }
   } else {
-    openFile(entry);
+    openFile(entry, sidebarNode);
   }
 };
 
@@ -83,7 +84,7 @@ const renderSidebarItemForFileEntry = (root, item) => {
   );
 
   fileListItemButton.addEventListener("click", () =>
-    handleFileSelection(entry)
+    handleFileSelection(entry, fileListItemButton)
   );
 
   fileListItemButton.innerText = entry.name;
@@ -137,7 +138,7 @@ const toggleSidebar = () => {
 
 const initializeEventListeners = () => {
   elements.sidebarToggle.addEventListener("click", toggleSidebar);
-  elements.saveButton.addEventListener("click", saveCurrentWorkingHandle);
+  elements.saveButton.addEventListener("click", saveactiveWorkingHandle);
   elements.openFolderButton.addEventListener("click", openFolder);
   CONSTANTS.MATCH_MEDIA_WIDTH_QUERY.addEventListener(
     "change",
@@ -206,27 +207,27 @@ const getFileContentsForHandle = async (handle) => {
 
 const handleChange = async () => {
   /* ToastUI triggers the change event when the editor is cleared which can be ignored */
-  if (!state.currentWorkingHandle) {
+  if (!state.activeWorkingHandle) {
     return;
   }
 
   const updatedContent = editor.getMarkdown();
-  const contents = await getFileContentsForHandle(state.currentWorkingHandle);
+  const contents = await getFileContentsForHandle(state.activeWorkingHandle);
 
   setIsChangedState(updatedContent !== contents);
 };
 
-const saveCurrentWorkingHandle = async () => {
+const saveactiveWorkingHandle = async () => {
   const updatedContent = editor.getMarkdown();
 
-  const contents = await getFileContentsForHandle(state.currentWorkingHandle);
+  const contents = await getFileContentsForHandle(state.activeWorkingHandle);
 
   /* No need to save (and get permission) if there are no changes */
   if (updatedContent === contents) {
     return;
   }
 
-  saveFileForHandle(state.currentWorkingHandle);
+  saveFileForHandle(state.activeWorkingHandle);
 };
 
 const getEntriesRecursivelyFromSelectedDirectory = async (directoryHandle) => {
@@ -237,7 +238,6 @@ const getEntriesRecursivelyFromSelectedDirectory = async (directoryHandle) => {
 
     switch (kind) {
       case "file":
-        console.log(entry.path);
         entries.push({
           kind,
           entry,
@@ -261,9 +261,17 @@ const getEntriesRecursivelyFromSelectedDirectory = async (directoryHandle) => {
   return entries.sort((a, b) => a.kind.localeCompare(b.kind));
 };
 
-const openFile = async (entry) => {
+const openFile = async (entry, sidebarNode) => {
   setIsChangedState(false);
-  state.currentWorkingHandle = entry;
+
+  if (state.activeSidebarNode) {
+    state.activeSidebarNode.dataset.isActive = "false";
+  }
+
+  state.activeWorkingHandle = entry;
+  state.activeSidebarNode = sidebarNode;
+
+  state.activeSidebarNode.dataset.isActive = "true";
 
   const contents = await await getFileContentsForHandle(entry);
   editor.setMarkdown(contents);
