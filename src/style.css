@@ -1,8 +1,11 @@
 :root {
-  --color-primary: #7bcfff;
+  --color-primary: #ff5420;
   --color-bg: #ffffff;
+  --color-bg-dark: #f2f2f2;
   --color-bg-darker: #eeeeee;
   --color-bg-darkest: #cccccc;
+
+  --color-text: #222222;
 
   --box-shadow-standard: rgba(60, 64, 67, 0.15) 0px 1px 7px 7px;
 
@@ -10,6 +13,28 @@
   --sidebar-content-width: 20rem;
 
   --transition-duration-snappy: 200ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #222222;
+    --color-bg-dark: #222222;
+    --color-bg-darker: #333333;
+    --color-bg-darkest: #666666;
+
+    --color-text: #ffffff;
+  }
+
+  @layer vendor-overwrite {
+    .toastui-editor-md-tab-container {
+      background-color: var(--color-bg) !important;
+    }
+
+    .toastui-editor-dark .toastui-editor-md-container,
+    .toastui-editor-dark .toastui-editor-ww-container {
+      background-color: var(--color-bg-dark) !important;
+    }
+  }
 }
 
 * {
@@ -22,6 +47,8 @@ body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  color: var(--color-text);
+  background-color: var(--color-bg);
 }
 
 .app {
@@ -123,6 +150,7 @@ body {
 .file-list__item-directory {
   flex: 1;
   font-family: monospace;
+  color: var(--color-text);
 }
 
 .file-list__item-button {
@@ -139,6 +167,7 @@ body {
 
 .main {
   flex: 1;
+  max-width: 100%;
 }
 
 .toolbar {
@@ -156,6 +185,7 @@ body {
 
 .toolbar__item-button:disabled {
   cursor: not-allowed;
+  color: var(--color-text);
   background-color: var(--color-bg-darker);
 }
 

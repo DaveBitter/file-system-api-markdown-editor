@@ -23,7 +23,10 @@ const templates = {
 
 /*** Contstants ***/
 const CONSTANTS = {
-  MATCH_MEDIA_QUERY: window.matchMedia("(min-width: 50rem)"),
+  MATCH_MEDIA_WIDTH_QUERY: window.matchMedia("(min-width: 50rem)"),
+  MATCH_MEDIA_COLOR_SCHEME_QUERY: window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  ),
 };
 
 let editor;
@@ -121,7 +124,7 @@ const openFolder = async () => {
   renderSidebarItemsFromEntries(entries, elements.fileRootList);
 };
 
-const onMediaQueryChange = ({ matches }) => {
+const onMediaQueryWidthChange = ({ matches }) => {
   elements.sidebar.dataset.isOpen = matches ? "true" : "false";
   editor.changePreviewStyle(matches ? "vertical" : "tab");
 };
@@ -136,14 +139,21 @@ const initializeEventListeners = () => {
   elements.sidebarToggle.addEventListener("click", toggleSidebar);
   elements.saveButton.addEventListener("click", saveCurrentWorkingHandle);
   elements.openFolderButton.addEventListener("click", openFolder);
+  CONSTANTS.MATCH_MEDIA_WIDTH_QUERY.addEventListener(
+    "change",
+    onMediaQueryWidthChange
+  );
 };
 
 const initializeEditor = () => {
   editor = new Editor({
     el: document.querySelector("[data-editor]"),
     initialEditType: "markdown",
-    previewStyle: window.innerWidth < 800 ? "horizontal" : "vertical",
+    previewStyle: CONSTANTS.MATCH_MEDIA_WIDTH_QUERY.matches
+      ? "horizontal"
+      : "vertical",
     height: "100vh",
+    theme: CONSTANTS.MATCH_MEDIA_COLOR_SCHEME_QUERY.matches ? "dark" : "light",
     events: {
       change: handleChange,
     },
@@ -154,16 +164,14 @@ const initializeEditor = () => {
   elements.editor.dataset.isActive = "true";
   editor.setMarkdown();
   editor.changePreviewStyle(
-    CONSTANTS.MATCH_MEDIA_QUERY.matches ? "vertical" : "tab"
+    CONSTANTS.MATCH_MEDIA_WIDTH_QUERY.matches ? "vertical" : "tab"
   );
 };
 
 const initializeSidebar = () => {
-  elements.sidebar.dataset.isOpen = CONSTANTS.MATCH_MEDIA_QUERY.matches
+  elements.sidebar.dataset.isOpen = CONSTANTS.MATCH_MEDIA_WIDTH_QUERY.matches
     ? "true"
     : "false";
-
-  CONSTANTS.MATCH_MEDIA_QUERY.addEventListener("change", onMediaQueryChange);
 
   elements.fileRootList.innerHTML = null;
 };
@@ -229,6 +237,7 @@ const getEntriesRecursivelyFromSelectedDirectory = async (directoryHandle) => {
 
     switch (kind) {
       case "file":
+        console.log(entry.path);
         entries.push({
           kind,
           entry,
