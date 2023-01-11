@@ -1,5 +1,6 @@
 :root {
   --color-primary: #ff5420;
+  --color-primary-darker: #ff1343;
   --color-bg: #ffffff;
   --color-bg-dark: #f2f2f2;
   --color-bg-darker: #eeeeee;
@@ -7,7 +8,15 @@
 
   --color-text: #222222;
 
+  --gradient-primary: linear-gradient(
+    45deg,
+    var(--color-primary),
+    var(--color-primary-darker)
+  );
+
   --box-shadow-standard: rgba(60, 64, 67, 0.15) 0px 1px 7px 7px;
+
+  --border-radius: 0.25rem;
 
   --sidebar-size-closed: 3rem;
   --sidebar-content-width: 20rem;
@@ -102,7 +111,9 @@ body {
   border: none;
   font-weight: 700;
   cursor: pointer;
-  background-color: var(--color-primary);
+  color: var(--color-text);
+  background: var(--gradient-primary);
+  border-radius: var(--border-radius);
 }
 
 .folder-picker {
@@ -271,7 +282,9 @@ body {
     .toastui-editor-defaultUI-toolbar
     input:checked
     + .switch:before {
-    background-color: var(--color-primary) !important;
+    color: var(--color-text) !important;
+    background: var(--gradient-primary) !important;
+    border-radius: var(--border-radius) !important;
   }
 
   .toastui-editor-dark .toastui-editor-defaultUI-toolbar .switch,
