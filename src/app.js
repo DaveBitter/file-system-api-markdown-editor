@@ -33,6 +33,7 @@ let editor;
 
 /*** Application state ***/
 const state = {
+  rootDirhandle: null,
   activeWorkingHandle: null,
   activeWorkingSidebarNode: null,
   hasChanges: false,
@@ -72,6 +73,12 @@ const renderSidebarItemForDirectoryEntry = async (root, item) => {
   root.appendChild(fileListDirectoryClone);
   fileListItem.appendChild(fileListClone);
 
+  const fileListItemCreateButton = fileListItem.querySelector(
+    "[data-file-list-item-directory-create-button]"
+  );
+
+  fileListItemCreateButton.addEventListener("click", () => createEntry());
+
   await renderSidebarItemsFromEntries(entries, fileList);
 };
 
@@ -82,9 +89,16 @@ const renderSidebarItemForFileEntry = (root, item) => {
   const fileListItemButton = fileListItemClone.querySelector(
     "[data-file-list-item-button]"
   );
+  const fileListItemRemoveButton = fileListItemClone.querySelector(
+    "[data-file-list-item-remove-button]"
+  );
 
   fileListItemButton.addEventListener("click", () =>
     handleFileSelection(entry, fileListItemButton)
+  );
+
+  fileListItemRemoveButton.addEventListener("click", () =>
+    removeEntry(entry, fileListItemButton)
   );
 
   fileListItemButton.innerText = entry.name;
@@ -108,7 +122,7 @@ const renderSidebarItemsFromEntries = async (entries, root) => {
 };
 
 const openFolder = async () => {
-  const dirHandle = await window.showDirectoryPicker({
+  state.rootDirhandle = await window.showDirectoryPicker({
     types: [
       {
         description: "Markdown",
@@ -119,7 +133,9 @@ const openFolder = async () => {
     ],
   });
 
-  const entries = await getEntriesRecursivelyFromSelectedDirectory(dirHandle);
+  const entries = await getEntriesRecursivelyFromSelectedDirectory(
+    state.rootDirhandle
+  );
 
   elements.fileRootList.innerHTML = null;
   renderSidebarItemsFromEntries(entries, elements.fileRootList);
@@ -138,7 +154,7 @@ const toggleSidebar = () => {
 
 const initializeEventListeners = () => {
   elements.sidebarToggle.addEventListener("click", toggleSidebar);
-  elements.saveButton.addEventListener("click", saveactiveWorkingHandle);
+  elements.saveButton.addEventListener("click", saveActiveWorkingHandle);
   elements.openFolderButton.addEventListener("click", openFolder);
   CONSTANTS.MATCH_MEDIA_WIDTH_QUERY.addEventListener(
     "change",
@@ -217,7 +233,7 @@ const handleChange = async () => {
   setIsChangedState(updatedContent !== contents);
 };
 
-const saveactiveWorkingHandle = async () => {
+const saveActiveWorkingHandle = async () => {
   const updatedContent = editor.getMarkdown();
 
   const contents = await getFileContentsForHandle(state.activeWorkingHandle);
@@ -259,6 +275,43 @@ const getEntriesRecursivelyFromSelectedDirectory = async (directoryHandle) => {
   }
 
   return entries.sort((a, b) => a.kind.localeCompare(b.kind));
+};
+
+const createEntry = async () => {
+  await self.showSaveFilePicker({
+    startIn: state.rootDirhandle,
+    suggestedName: "untitled.md",
+    types: [
+      {
+        description: "Markdown files",
+        accept: {
+          "text/md": [".md"],
+        },
+      },
+    ],
+  });
+
+  const entries = await getEntriesRecursivelyFromSelectedDirectory(
+    state.rootDirhandle
+  );
+
+  elements.fileRootList.innerHTML = null;
+  renderSidebarItemsFromEntries(entries, elements.fileRootList);
+};
+
+const removeEntry = async (entry, sidebarNode) => {
+  const { kind } = entry;
+  if (window.confirm(`Are you sure you want to delete this ${kind}?`)) {
+    await entry.remove();
+    sidebarNode.parentNode.removeChild(sidebarNode);
+
+    const entries = await getEntriesRecursivelyFromSelectedDirectory(
+      state.rootDirhandle
+    );
+
+    elements.fileRootList.innerHTML = null;
+    renderSidebarItemsFromEntries(entries, elements.fileRootList);
+  }
 };
 
 const openFile = async (entry, sidebarNode) => {

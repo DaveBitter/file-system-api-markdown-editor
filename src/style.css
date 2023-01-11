@@ -124,8 +124,15 @@ body {
 }
 
 .file-list__item {
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.file-list__item:hover > .file-list__remove-button,
+.file-list__item:hover > .file-list__create-button {
+  display: block;
 }
 
 .file-list__item:has(.file-list) {
@@ -138,7 +145,6 @@ body {
 
 .file-list__item-button,
 .file-list__item-directory {
-  flex: 1;
   font-family: monospace;
   color: var(--color-text);
 }
@@ -155,7 +161,27 @@ body {
   color: var(--color-primary);
 }
 
+.file-list__remove-button,
+.file-list__create-button {
+  display: none;
+  position: relative;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.file-list__remove-button img,
+.file-list__create-button img {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 1rem;
+  height: 1rem;
+  transform: translate(100%, -50%);
+}
+
 .file-list__item-directory {
+  position: relative;
   font-weight: 700;
 }
 
