@@ -15,6 +15,9 @@ const elements = {
 
 const templates = {
   fileList: document.querySelector("[data-template-file-list]"),
+  fileListRootDirectory: document.querySelector(
+    "[data-template-file-list-root-directory]"
+  ),
   fileListItem: document.querySelector("[data-template-file-list-item]"),
   fileListDirectory: document.querySelector(
     "[data-template-file-list-directory]"
@@ -54,6 +57,28 @@ const handleFileSelection = (entry, sidebarNode) => {
   }
 };
 
+const renderSidebarItemForRootDirectoryEntry = async (entry) => {
+  const fileListRootDirectoryClone =
+    templates.fileListRootDirectory.content.cloneNode(true);
+  const fileListRootDirectory = fileListRootDirectoryClone.querySelector(
+    "[data-file-list-root-directory]"
+  );
+
+  const fileListRootDirectoryName = fileListRootDirectory.querySelector(
+    "[data-file-list-root-name]"
+  );
+  fileListRootDirectoryName.innerText = entry.name;
+  elements.fileRootList.appendChild(fileListRootDirectory);
+
+  const fileListRootDirectoryCreateButton = fileListRootDirectory.querySelector(
+    "[data-file-list-root-directory-create-button]"
+  );
+
+  fileListRootDirectoryCreateButton.addEventListener("click", () =>
+    createEntry()
+  );
+};
+
 const renderSidebarItemForDirectoryEntry = async (root, item) => {
   const { entry, entries } = item;
 
@@ -64,13 +89,13 @@ const renderSidebarItemForDirectoryEntry = async (root, item) => {
   const fileListItem = fileListDirectoryClone.querySelector(
     "[data-file-list-item]"
   );
-  const fileListDirectory = fileListDirectoryClone.querySelector(
+  const fileListDirectory = fileListItem.querySelector(
     "[data-file-list-item-directory]"
   );
   const fileList = fileListClone.querySelector("[data-file-list]");
 
   fileListDirectory.innerText = entry.name;
-  root.appendChild(fileListDirectoryClone);
+  root.appendChild(fileListItem);
   fileListItem.appendChild(fileListClone);
 
   const fileListItemCreateButton = fileListItem.querySelector(
@@ -86,10 +111,11 @@ const renderSidebarItemForFileEntry = (root, item) => {
   const { entry } = item;
 
   const fileListItemClone = templates.fileListItem.content.cloneNode(true);
-  const fileListItemButton = fileListItemClone.querySelector(
+  const fileListItem = fileListItemClone.querySelector("[data-file-list-item]");
+  const fileListItemButton = fileListItem.querySelector(
     "[data-file-list-item-button]"
   );
-  const fileListItemRemoveButton = fileListItemClone.querySelector(
+  const fileListItemRemoveButton = fileListItem.querySelector(
     "[data-file-list-item-remove-button]"
   );
 
@@ -127,6 +153,7 @@ const renderSidebar = async () => {
   );
 
   elements.fileRootList.innerHTML = null;
+  renderSidebarItemForRootDirectoryEntry(state.rootDirhandle);
   renderSidebarItemsFromEntries(entries, elements.fileRootList);
 };
 

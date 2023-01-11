@@ -39,6 +39,12 @@
         <div class="sidebar__content">
           <button class="folder-picker" autofocus data-open-folder>Open folder</button>
           <ul class="file-list" data-file-root-list></ul>
+          <template data-template-file-list-root-directory>
+            <li class="file-list__root-directory" data-file-list-root-directory>
+              <span class="file-list__root-directory-name" data-file-list-root-name></span>
+              <button class="file-list__root-create-button" data-file-list-root-directory-create-button><img src="./icons/add-file.svg"></button>
+            </li>
+          </template>
 
           <template data-template-file-list>
             <ul class="file-list" data-file-list></ul>

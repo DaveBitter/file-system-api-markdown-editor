@@ -123,6 +123,15 @@ body {
   padding-left: 0.5rem;
 }
 
+.file-list__root-directory {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--color-bg-darkest);
+}
+
 .file-list__item {
   position: relative;
   display: inline-flex;
@@ -162,12 +171,24 @@ body {
 }
 
 .file-list__remove-button,
+.file-list__root-create-button,
 .file-list__create-button {
-  display: none;
-  position: relative;
   border: none;
   background: none;
   cursor: pointer;
+}
+
+.file-list__remove-button,
+.file-list__create-button {
+  display: none;
+  position: relative;
+}
+
+.file-list__remove-button img,
+.file-list__root-create-button img,
+.file-list__create-button img {
+  width: 1rem;
+  height: 1rem;
 }
 
 .file-list__remove-button img,
@@ -175,8 +196,6 @@ body {
   position: absolute;
   top: 50%;
   right: 0;
-  width: 1rem;
-  height: 1rem;
   transform: translate(100%, -50%);
 }
 
