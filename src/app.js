@@ -121,6 +121,15 @@ const renderSidebarItemsFromEntries = async (entries, root) => {
   }
 };
 
+const renderSidebar = async () => {
+  const entries = await getEntriesRecursivelyFromSelectedDirectory(
+    state.rootDirhandle
+  );
+
+  elements.fileRootList.innerHTML = null;
+  renderSidebarItemsFromEntries(entries, elements.fileRootList);
+};
+
 const openFolder = async () => {
   state.rootDirhandle = await window.showDirectoryPicker({
     types: [
@@ -133,12 +142,7 @@ const openFolder = async () => {
     ],
   });
 
-  const entries = await getEntriesRecursivelyFromSelectedDirectory(
-    state.rootDirhandle
-  );
-
-  elements.fileRootList.innerHTML = null;
-  renderSidebarItemsFromEntries(entries, elements.fileRootList);
+  renderSidebar();
 };
 
 const onMediaQueryWidthChange = ({ matches }) => {
@@ -291,12 +295,7 @@ const createEntry = async () => {
     ],
   });
 
-  const entries = await getEntriesRecursivelyFromSelectedDirectory(
-    state.rootDirhandle
-  );
-
-  elements.fileRootList.innerHTML = null;
-  renderSidebarItemsFromEntries(entries, elements.fileRootList);
+  renderSidebar();
 };
 
 const removeEntry = async (entry, sidebarNode) => {
@@ -305,12 +304,7 @@ const removeEntry = async (entry, sidebarNode) => {
     await entry.remove();
     sidebarNode.parentNode.removeChild(sidebarNode);
 
-    const entries = await getEntriesRecursivelyFromSelectedDirectory(
-      state.rootDirhandle
-    );
-
-    elements.fileRootList.innerHTML = null;
-    renderSidebarItemsFromEntries(entries, elements.fileRootList);
+    renderSidebar();
   }
 };
 
