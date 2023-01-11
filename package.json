@@ -5,13 +5,22 @@
   "author": "Dave Bitter <dbitter@anwb.nl>",
   "license": "MIT",
   "scripts": {
-    "build": "parcel build src/index.html",
-    "dev": "parcel src/index.html"
+    "build": "parcel build src/index.html && yarn copy:public",
+    "dev": "parcel src/index.html",
+    "copy:public": "cp -r ./public/* dist"
+  },
+  "staticFiles": {
+    "staticPath": [
+      "public"
+    ]
   },
   "dependencies": {
     "@toast-ui/editor": "^3.2.1"
   },
   "devDependencies": {
-    "parcel": "^2.7.0"
+    "@parcel/packager-raw-url": "2.8.2",
+    "@parcel/transformer-webmanifest": "2.8.2",
+    "parcel": "^2.7.0",
+    "parcel-plugin-static-files-copy": "^2.6.0"
   }
 }

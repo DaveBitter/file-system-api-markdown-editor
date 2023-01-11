@@ -2,6 +2,7 @@
 import Editor from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import "@toast-ui/editor/dist/theme/toastui-editor-dark.css";
+import { registerServiceWorker } from "./registerServiceWorker";
 
 /*** Cached selectors to be used ***/
 const elements = {
@@ -352,3 +353,4 @@ const openFile = async (entry, sidebarNode) => {
 };
 
 initializeApplication();
+registerServiceWorker();
