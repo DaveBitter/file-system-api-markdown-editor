@@ -2,6 +2,10 @@
 import Editor from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import "@toast-ui/editor/dist/theme/toastui-editor-dark.css";
+
+import toastr from "toastr";
+
+/*** Internal deps ***/
 import { registerServiceWorker } from "./registerServiceWorker";
 
 /*** Cached selectors to be used ***/
@@ -201,6 +205,26 @@ const initializeEventListeners = () => {
   );
 };
 
+const initializeToastr = () => {
+  toastr.options = {
+    closeButton: true,
+    debug: false,
+    newestOnTop: false,
+    progressBar: true,
+    positionClass: "toast-bottom-right",
+    preventDuplicates: false,
+    onclick: null,
+    showDuration: "300",
+    hideDuration: "1000",
+    timeOut: "5000",
+    extendedTimeOut: "1000",
+    showEasing: "swing",
+    hideEasing: "linear",
+    showMethod: "fadeIn",
+    hideMethod: "fadeOut",
+  };
+};
+
 const initializeEditor = () => {
   editor = new Editor({
     el: document.querySelector("[data-editor]"),
@@ -235,6 +259,7 @@ const initializeSidebar = () => {
 const initializeApplication = () => {
   initializeSidebar();
   initializeEditor();
+  initializeToastr();
   initializeEventListeners();
 };
 
@@ -244,11 +269,17 @@ const setIsChangedState = (isChanged) => {
 };
 
 const saveFileForHandle = async (handle) => {
-  const updatedContent = editor.getMarkdown();
+  try {
+    const updatedContent = editor.getMarkdown();
 
-  const writable = await handle.createWritable();
-  await writable.write(updatedContent);
-  await writable.close();
+    const writable = await handle.createWritable();
+    await writable.write(updatedContent);
+    await writable.close();
+
+    toastr.success(`Saved ${handle.name}`);
+  } catch (error) {
+    toastr.error(`Something went wrong saving ${handle.name}`);
+  }
 
   setIsChangedState(false);
 };
@@ -317,27 +348,39 @@ const getEntriesRecursivelyFromSelectedDirectory = async (directoryHandle) => {
 };
 
 const createEntry = async (entry) => {
-  await self.showSaveFilePicker({
-    startIn: entry,
-    suggestedName: "untitled.md",
-    types: [
-      {
-        description: "Markdown files",
-        accept: {
-          "text/md": [".md"],
+  try {
+    await self.showSaveFilePicker({
+      startIn: entry,
+      suggestedName: "untitled.md",
+      types: [
+        {
+          description: "Markdown files",
+          accept: {
+            "text/md": [".md"],
+          },
         },
-      },
-    ],
-  });
+      ],
+    });
+
+    toastr.success(`Created ${entry.name}`);
+  } catch (error) {
+    toastr.error(`Something went wrong creating ${entry.name}`);
+  }
 
   renderSidebar();
 };
 
 const removeEntry = async (entry, sidebarNode) => {
-  const { kind } = entry;
-  console.log(entry);
+  const { kind, name } = entry;
+
   if (window.confirm(`Are you sure you want to delete this ${kind}?`)) {
-    await entry.remove();
+    try {
+      await entry.remove();
+      toastr.success(`Removed ${name}`);
+    } catch (error) {
+      toastr.error(`Something went wrong removing ${name}`);
+    }
+
     sidebarNode.parentNode.removeChild(sidebarNode);
 
     renderSidebar();
@@ -356,8 +399,13 @@ const openFile = async (entry, sidebarNode) => {
 
   state.activeSidebarNode.dataset.isActive = "true";
 
-  const contents = await await getFileContentsForHandle(entry);
-  editor.setMarkdown(contents);
+  try {
+    const contents = await getFileContentsForHandle(entry);
+
+    editor.setMarkdown(contents);
+  } catch (error) {
+    toastr.error(`Something went wrong opening ${entry.name}`);
+  }
 };
 
 initializeApplication();

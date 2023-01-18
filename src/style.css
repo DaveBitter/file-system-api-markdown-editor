@@ -6,7 +6,17 @@
   --color-bg-darker: #eeeeee;
   --color-bg-darkest: #cccccc;
 
+  --color-success: #a2faa2;
+  --color-error: #f95950;
+  --color-info: #7be0ff;
+  --color-warning: #ffb248;
+
   --color-text: #222222;
+
+  --color-text-success: #367a36;
+  --color-text-error: #8e2a25;
+  --color-text-info: #1e677d;
+  --color-text-warning: #a46002;
 
   --gradient-primary: linear-gradient(
     45deg,
@@ -273,6 +283,46 @@ body {
 }
 
 @layer vendor-overwrite {
+  .toast-close-button,
+  #toast-container > div,
+  #toast-container > div:hover {
+    box-shadow: none !important;
+  }
+
+  .toast-success {
+    background-color: var(--color-success) !important;
+    color: var(--color-text-success) !important;
+  }
+  .toast-error {
+    background-color: var(--color-error) !important;
+    color: var(--color-text-error) !important;
+  }
+  .toast-info {
+    background-color: var(--color-info) !important;
+    color: var(--color-text-info) !important;
+  }
+  .toast-warning {
+    background-color: var(--color-warning) !important;
+    color: var(--color-text-warning) !important;
+  }
+
+  #toast-container > .toast-info {
+    padding-left: 0.5rem !important;
+    background-image: none !important;
+  }
+  #toast-container > .toast-error {
+    padding-left: 0.5rem !important;
+    background-image: none !important;
+  }
+  #toast-container > .toast-success {
+    padding-left: 0.5rem !important;
+    background-image: none !important;
+  }
+  #toast-container > .toast-warning {
+    padding-left: 0.5rem !important;
+    background-image: none !important;
+  }
+
   .toastui-editor-dark
     .toastui-editor-defaultUI-toolbar
     .scroll-sync.active:before {

@@ -15,7 +15,8 @@
     ]
   },
   "dependencies": {
-    "@toast-ui/editor": "^3.2.1"
+    "@toast-ui/editor": "^3.2.1",
+    "toastr": "^2.1.4"
   },
   "devDependencies": {
     "@parcel/packager-raw-url": "2.8.2",
