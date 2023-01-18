@@ -76,7 +76,7 @@ const renderSidebarItemForRootDirectoryEntry = async (entry) => {
   );
 
   fileListRootDirectoryCreateButton.addEventListener("click", () =>
-    createEntry()
+    createEntry(entry)
   );
 };
 
@@ -103,7 +103,7 @@ const renderSidebarItemForDirectoryEntry = async (root, item) => {
     "[data-file-list-item-directory-create-button]"
   );
 
-  fileListItemCreateButton.addEventListener("click", () => createEntry());
+  fileListItemCreateButton.addEventListener("click", () => createEntry(entry));
 
   await renderSidebarItemsFromEntries(entries, fileList);
 };
@@ -309,9 +309,9 @@ const getEntriesRecursivelyFromSelectedDirectory = async (directoryHandle) => {
   return entries.sort((a, b) => a.kind.localeCompare(b.kind));
 };
 
-const createEntry = async () => {
+const createEntry = async (entry) => {
   await self.showSaveFilePicker({
-    startIn: state.rootDirhandle,
+    startIn: entry,
     suggestedName: "untitled.md",
     types: [
       {
