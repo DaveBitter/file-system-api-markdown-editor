@@ -93,16 +93,23 @@ const renderSidebarItemForDirectoryEntry = async (root, item) => {
   const fileListDirectory = fileListItem.querySelector(
     "[data-file-list-item-directory]"
   );
+
   const fileList = fileListClone.querySelector("[data-file-list]");
 
   fileListDirectory.innerText = entry.name;
   root.appendChild(fileListItem);
   fileListItem.appendChild(fileListClone);
 
+  const fileListDirectoryRemoveButton = fileListItem.querySelector(
+    "[data-file-list-item-directory-remove-button]"
+  );
+  fileListDirectoryRemoveButton.addEventListener("click", () =>
+    removeEntry(entry, fileListDirectoryRemoveButton)
+  );
+
   const fileListItemCreateButton = fileListItem.querySelector(
     "[data-file-list-item-directory-create-button]"
   );
-
   fileListItemCreateButton.addEventListener("click", () => createEntry(entry));
 
   await renderSidebarItemsFromEntries(entries, fileList);
@@ -328,6 +335,7 @@ const createEntry = async (entry) => {
 
 const removeEntry = async (entry, sidebarNode) => {
   const { kind } = entry;
+  console.log(entry);
   if (window.confirm(`Are you sure you want to delete this ${kind}?`)) {
     await entry.remove();
     sidebarNode.parentNode.removeChild(sidebarNode);

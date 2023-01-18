@@ -148,6 +148,7 @@ body {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 0 0.5rem;
 }
 
 .file-list__item:hover > .file-list__remove-button,
@@ -207,7 +208,7 @@ body {
   position: absolute;
   top: 50%;
   right: 0;
-  transform: translate(100%, -50%);
+  transform: translateY(-50%);
 }
 
 .file-list__item-directory {
