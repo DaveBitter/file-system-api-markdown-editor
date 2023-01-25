@@ -77,5 +77,15 @@
         <div class="editor" data-editor data-is-active="false"></div>
       </main>
     </div>
+    <div class="notice" data-is-visible="false" data-unsupported-notice>
+      <div class="notice__content">
+        <h1 class="notice__title">Your browser doesn't support this demo</h1>
+        <p class="notice__copy">This could be due to one of two things:</p>
+        <ul class="notice__list">
+          <li class="notice__list-item">There is <a href="https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API#api.filesystemfilehandle" target="__blank">no support</a> for the File System Access API</li>
+          <li class="notice__list-item">You need to turn on <pre>#enable-experimental-web-platform-features</pre> in <pre>chrome://flags</pre><img class="notice__image" src="./images/chrome-flags-experimental.webp" alt="A screenshot of the Chrome flags settings" /> </li>
+        </ul>
+      </div>
+    </div>
   </body>
 </html>

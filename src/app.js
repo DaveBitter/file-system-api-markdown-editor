@@ -16,6 +16,7 @@ const elements = {
   fileRootList: document.querySelector("[data-file-root-list]"),
   saveButton: document.querySelector("[data-save-button]"),
   editor: document.querySelector("[data-editor]"),
+  unsupportedNotice: document.querySelector("[data-unsupported-notice]"),
 };
 
 const templates = {
@@ -256,7 +257,18 @@ const initializeSidebar = () => {
   elements.fileRootList.innerHTML = null;
 };
 
+const showUnsupportedNotice = () => {
+  elements.unsupportedNotice.dataset.isVisible = "true";
+};
+
 const initializeApplication = () => {
+  const isSupported = "showDirectoryPicker" in window;
+
+  if (!isSupported) {
+    showUnsupportedNotice();
+    return;
+  }
+  console.log();
   initializeSidebar();
   initializeEditor();
   initializeToastr();
