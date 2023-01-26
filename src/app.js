@@ -161,8 +161,8 @@ const renderSidebarItemsFromEntries = async (entries, root) => {
 };
 
 const renderSidebar = async () => {
-  const entries = await getEntriesRecursivelyFromSelectedDirectory(
-    state.rootDirhandle
+  const entries = await getEntriesRecursivelyFromHandles(
+    state.rootDirhandle.values()
   );
 
   elements.fileRootList.innerHTML = null;
@@ -174,7 +174,7 @@ const openFolder = async () => {
   state.rootDirhandle = await window.showDirectoryPicker({
     types: [
       {
-        description: "Markdown",
+        description: "MarkDown",
         accept: {
           "text/markdown": [".md"],
         },
@@ -268,7 +268,7 @@ const initializeApplication = () => {
     showUnsupportedNotice();
     return;
   }
-  console.log();
+
   initializeSidebar();
   initializeEditor();
   initializeToastr();
@@ -328,10 +328,10 @@ const saveActiveWorkingHandle = async () => {
   saveFileForHandle(state.activeWorkingHandle);
 };
 
-const getEntriesRecursivelyFromSelectedDirectory = async (directoryHandle) => {
+const getEntriesRecursivelyFromHandles = async (handles) => {
   const entries = [];
 
-  for await (const entry of directoryHandle.values()) {
+  for await (const entry of handles) {
     const { kind } = entry;
 
     switch (kind) {
@@ -343,13 +343,13 @@ const getEntriesRecursivelyFromSelectedDirectory = async (directoryHandle) => {
         break;
 
       case "directory":
-        const handles = await directoryHandle.getDirectoryHandle(entry.name);
+        const directoryHandles = await entry.values();
 
         entries.push({
           kind,
           entry,
-          entries: await getEntriesRecursivelyFromSelectedDirectory(
-            handles
+          entries: await getEntriesRecursivelyFromHandles(
+            directoryHandles
           ).catch(console.error),
         });
         break;
