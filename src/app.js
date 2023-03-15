@@ -343,7 +343,7 @@ const getEntriesRecursivelyFromHandles = async (handles) => {
         break;
 
       case "directory":
-        const directoryHandles = await entry.values();
+        const directoryHandles = entry.values();
 
         entries.push({
           kind,
